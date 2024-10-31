@@ -36,6 +36,7 @@ from utils.imutils import crop
 from utils.renderer import Renderer
 import config
 import constants
+import trimesh
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint', required=True, help='Path to pretrained checkpoint')
@@ -95,6 +96,33 @@ def process_image(img_file, bbox_file, openpose_file, input_res=224):
     norm_img = normalize_img(img.clone())[None]
     return img, norm_img
 
+def save_obj(vertices, faces, output_path="output_model.obj"):
+    """
+    Save the 3D model as an OBJ file.
+
+    Parameters:
+        vertices (torch.Tensor or np.ndarray): Vertex positions (V x 3).
+        faces (torch.Tensor or np.ndarray): Face indices (F x 3).
+        output_path (str): Path where the OBJ file will be saved.
+    """
+    # Convert vertices and faces to numpy if they are tensors
+    if isinstance(vertices, torch.Tensor):
+        vertices = vertices.squeeze(0).cpu().numpy()  # Remove batch dimension
+    if isinstance(faces, torch.Tensor):
+        faces = faces.cpu().numpy()
+
+    # Validate the shapes
+    if faces.ndim != 2 or faces.shape[1] != 3:
+        raise ValueError(f"Faces should have shape (F, 3), but got {faces.shape}")
+
+    if vertices.ndim != 2 or vertices.shape[1] != 3:
+        raise ValueError(f"Vertices should have shape (V, 3), but got {vertices.shape}")
+
+    # Create and export the mesh
+    mesh = trimesh.Trimesh(vertices, faces)
+    mesh.export(output_path)
+    print(f"Model saved as {output_path}")
+
 if __name__ == '__main__':
     args = parser.parse_args()
     
@@ -121,7 +149,9 @@ if __name__ == '__main__':
         pred_rotmat, pred_betas, pred_camera = model(norm_img.to(device))
         pred_output = smpl(betas=pred_betas, body_pose=pred_rotmat[:,1:], global_orient=pred_rotmat[:,0].unsqueeze(1), pose2rot=False)
         pred_vertices = pred_output.vertices
-        
+
+    # Save the 3D model as OBJ
+    save_obj(pred_vertices, smpl.faces, output_path="human_model.obj")   
     # Calculate camera parameters for rendering
     camera_translation = torch.stack([pred_camera[:,1], pred_camera[:,2], 2*constants.FOCAL_LENGTH/(constants.IMG_RES * pred_camera[:,0] +1e-9)],dim=-1)
     camera_translation = camera_translation[0].cpu().numpy()
