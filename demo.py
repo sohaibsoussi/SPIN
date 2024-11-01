@@ -117,7 +117,12 @@ def save_obj(vertices, faces, output_path="output_model.obj"):
 
     if vertices.ndim != 2 or vertices.shape[1] != 3:
         raise ValueError(f"Vertices should have shape (V, 3), but got {vertices.shape}")
-
+    # Rotate the vertices to flip the model upright
+    rotation_matrix = np.array([[1, 0, 0],
+                                [0, -1, 0],
+                                [0, 0, -1]])
+                                
+    vertices = vertices.dot(rotation_matrix)
     # Create and export the mesh
     mesh = trimesh.Trimesh(vertices, faces)
     mesh.export(output_path)
