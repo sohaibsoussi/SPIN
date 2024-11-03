@@ -1,5 +1,6 @@
 import os
 os.environ['PYOPENGL_PLATFORM'] = 'egl'
+os.environ['EGL_DEVICE_ID'] = '0'
 import torch
 from torchvision.utils import make_grid
 import numpy as np
