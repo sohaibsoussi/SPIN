@@ -1,6 +1,5 @@
 import os
-os.environ['PYOPENGL_PLATFORM'] = 'egl'
-os.environ['EGL_DEVICE_ID'] = '1'
+os.environ['PYOPENGL_PLATFORM'] = 'osmesa'
 import torch
 from torchvision.utils import make_grid
 import numpy as np
