@@ -33,7 +33,7 @@ import json
 
 from models import hmr, SMPL
 from utils.imutils import crop
-from utils.renderer import Renderer
+from utils.rendererForWindows import Renderer
 import config
 import constants
 import trimesh
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         pred_vertices = pred_output.vertices
 
     # Save the 3D model as OBJ
-    save_obj(pred_vertices, smpl.faces, output_path="human_model.obj")   
+    save_obj(pred_vertices, smpl.faces, output_path="outputs/human_model.obj")   
     # Calculate camera parameters for rendering
     camera_translation = torch.stack([pred_camera[:,1], pred_camera[:,2], 2*constants.FOCAL_LENGTH/(constants.IMG_RES * pred_camera[:,0] +1e-9)],dim=-1)
     camera_translation = camera_translation[0].cpu().numpy()

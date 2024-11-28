@@ -4,7 +4,6 @@ import numpy as np
 
 """
 Useful geometric operations, e.g. Perspective projection and a differentiable Rodrigues formula
-Parts of the code are taken from https://github.com/MandyMo/pytorch_HMR
 """
 def batch_rodrigues(theta):
     """Convert axis-angle representation to rotation matrix.
